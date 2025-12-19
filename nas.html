@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Samba File Sharing Tutorial | Linux Mint</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #8cc84b;
+            --primary-dark: #6fa33b;
+            --secondary: #333333;
+            --accent: #ff9f43;
+            --light-bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e1e5eb;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--secondary) 0%, #555 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            border-bottom: 5px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        header h1 i {
+            color: var(--primary);
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .progress-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+        
+        .tutorial-section {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+        
+        .tutorial-section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .section-header i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+        }
+        
+        .checklist-item.checked {
+            border-left-color: var(--success);
+        }
+        
+        .checklist-item input {
+            margin-right: 15px;
+            transform: scale(1.3);
+        }
+        
+        .code-block {
+            background-color: var(--secondary);
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-block pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .placeholder {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+            font-weight: 600;
+        }
+        
+        .placeholder span {
+            background-color: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .interactive-terminal {
+            background-color: #1e1e1e;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .terminal-prompt {
+            color: #8cc84b;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        
+        .terminal-output {
+            color: #f8f8f2;
+        }
+        
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #f8f8f2;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-next {
+            background-color: var(--accent);
+        }
+        
+        .btn-next:hover {
+            background-color: #e68900;
+        }
+        
+        .info-box {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .success-box {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .sidebar {
+            position: sticky;
+            top: 30px;
+            align-self: start;
+        }
+        
+        .sidebar-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-card h3 i {
+            color: var(--primary);
+        }
+        
+        .role-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .role-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            background-color: var(--light-bg);
+        }
+        
+        .role-box.host {
+            border-top: 5px solid var(--primary);
+        }
+        
+        .role-box.client {
+            border-top: 5px solid var(--accent);
+        }
+        
+        .role-box i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .connection-line {
+            width: 3px;
+            height: 40px;
+            background-color: var(--border);
+        }
+        
+        .quick-nav {
+            list-style-type: none;
+        }
+        
+        .quick-nav li {
+            margin-bottom: 12px;
+        }
+        
+        .quick-nav a {
+            text-decoration: none;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .quick-nav a:hover {
+            background-color: var(--light-bg);
+        }
+        
+        .quick-nav a.active {
+            background-color: var(--light-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .use-case-card {
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s;
+            border-top: 5px solid var(--primary);
+        }
+        
+        .use-case-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .use-case-card i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .platform-item {
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .platform-item i {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--primary);
+        }
+        
+        .toggle-container {
+            margin: 20px 0;
+        }
+        
+        .toggle-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-content {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            display: none;
+        }
+        
+        .toggle-content.active {
+            display: block;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-network-wired"></i> Samba File Sharing Tutorial</h1>
+            <p class="tagline">Learn how to share files across your home network with this interactive guide for Linux Mint beginners</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-stats">
+                <span>Progress: <span id="progressPercent">0%</span></span>
+                <span>Section: <span id="currentSection">Introduction</span></span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="tutorial-content">
+                <!-- Introduction Section -->
+                <section id="intro" class="tutorial-section">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h2>What is Samba and Why Use It?</h2>
+                    </div>
+                    
+                    <p>Samba is free, open-source software that allows different computers to share files over a network. Think of it like your own personal Dropbox or Google Drive, but you control everything on your own home network.</p>
+                    
+                    <div class="info-box">
+                        <p><strong>Perfect for:</strong> Accessing your external hard drive full of movies, music, or video projects from any computer in your home - no more unplugging and moving the USB drive around!</p>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 15px;">The Main Use Case: External USB Drive Sharing</h3>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('problemToggle')">
+                            <span><i class="fas fa-exclamation-triangle"></i> The Problem This Solves</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="problemToggle">
+                            <p>You have a 4TB USB hard drive connected to your Linux Mint desktop with:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Your entire media collection (movies, music, shows)</li>
+                                <li>Your game library (Steam games, ROMs, installers)</li>
+                                <li>Large project files (video editing, 3D models, photos)</li>
+                                <li>Important documents and backups</li>
+                            </ul>
+                            <p style="margin-top: 15px;">You want to:</p>
+                            <div class="use-case-grid">
+                                <div class="use-case-card">
+                                    <i class="fas fa-gamepad"></i>
+                                    <h4>Stream media or play games from your laptop</h4>
+                                </div>
+                                <div class="use-case-card">
+                                    <i class="fas fa-folder-open"></i>
+                                    <h4>Access large files without moving the USB drive</h4>
+                                </div>
+                                <div class="use-case-card">
+                                    <i class="fas fa-video"></i>
+                                    <h4>Edit projects using files stored on the drive</h4>
+                                </div>
+                                <div class="use-case-card">
+                                    <i class="fas fa-hdd"></i>
+                                    <h4>Keep everything centralized in one place</h4>
+                                </div>
+                            </div>
+                            <p style="margin-top: 20px; font-weight: 600; text-align: center;">This is what Samba does perfectly!</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-next" onclick="showSection('understanding')">
+                        Next: Understanding the Setup <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Understanding the Setup Section -->
+                <section id="understanding" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-sitemap"></i>
+                        <h2>Understanding the Setup</h2>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 15px;">The Two Roles</h3>
+                    
+                    <div class="role-visual">
+                        <div class="role-box host">
+                            <i class="fas fa-desktop"></i>
+                            <h4>Host Computer (Server)</h4>
+                            <p>Where your USB drive is plugged in</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Example: Linux Mint desktop named "desktop-pc" with a USB drive</p>
+                        </div>
+                        
+                        <div class="connection-line"></div>
+                        
+                        <div class="role-box client">
+                            <i class="fas fa-laptop"></i>
+                            <h4>Client Computer</h4>
+                            <p>Any other computer accessing the USB drive</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Example: Linux Mint laptop named "laptop-pc"</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('intro')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('prerequisites')">
+                        Next: Before You Start <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Prerequisites Section -->
+                <section id="prerequisites" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-clipboard-check"></i>
+                        <h2>Before You Start: What You'll Need</h2>
+                    </div>
+                    
+                    <div class="checklist">
+                        <div class="checklist-item" id="check1">
+                            <input type="checkbox" id="item1" onchange="updateChecklist('check1')">
+                            <label for="item1">Host computer with USB drive connected and mounted</label>
+                        </div>
+                        <div class="checklist-item" id="check2">
+                            <input type="checkbox" id="item2" onchange="updateChecklist('check2')">
+                            <label for="item2">Both computers on the same WiFi network</label>
+                        </div>
+                        <div class="checklist-item" id="check3">
+                            <input type="checkbox" id="item3" onchange="updateChecklist('check3')">
+                            <label for="item3">Samba installed on the host computer (we'll do this together)</label>
+                        </div>
+                        <div class="checklist-item" id="check4">
+                            <input type="checkbox" id="item4" onchange="updateChecklist('check4')">
+                            <label for="item4">Basic comfort with the terminal (we'll explain everything!)</label>
+                        </div>
+                        <div class="checklist-item" id="check5">
+                            <input type="checkbox" id="item5" onchange="updateChecklist('check5')">
+                            <label for="item5">Administrator (sudo) password</label>
+                        </div>
+                        <div class="checklist-item" id="check6">
+                            <input type="checkbox" id="item6" onchange="updateChecklist('check6')">
+                            <label for="item6">20-30 minutes of your time</label>
+                        </div>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <p><strong>Important: Understanding Placeholders in This Guide</strong></p>
+                        <p>Throughout this guide, we use generic placeholders that you need to replace with your actual information:</p>
+                        <div class="placeholder" style="margin-top: 10px;">
+                            <span>username</span> = Your actual Linux username (find it by typing <code>whoami</code> in terminal)
+                        </div>
+                        <div class="placeholder">
+                            <span>user2</span> = Another person's username for accessing the share (you'll create this)
+                        </div>
+                        <div class="placeholder">
+                            <span>192.168.1.105</span> = Your host computer's actual IP address (we'll find this together)
+                        </div>
+                        <div class="placeholder">
+                            <span>/media/username/external</span> = Your USB drive's actual location (we'll find this too)
+                        </div>
+                        <div class="placeholder">
+                            <span>SharedDrive</span> = The name you want to give your share (you choose this!)
+                        </div>
+                        <p style="margin-top: 10px;">Don't worry! We'll show you exactly how to find each piece of information as we go.</p>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('understanding')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('install')">
+                        Next: Installing Samba <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Install Samba Section -->
+                <section id="install" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-download"></i>
+                        <h2>Installing Samba on Linux Mint</h2>
+                    </div>
+                    
+                    <p>Let's start by installing Samba on your host computer (the one with the USB drive).</p>
+                    
+                    <div class="info-box">
+                        <p><strong>Terminal Tip:</strong> Open Terminal with <code>Ctrl+Alt+T</code> or by searching for "Terminal" in your applications menu.</p>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 15px;">Installation Commands</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode('installCode')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <pre id="installCode">sudo apt update
+sudo apt install samba samba-common-bin</pre>
+                    </div>
+                    
+                    <p>Enter your password when prompted. Type <code>Y</code> when asked to continue.</p>
+                    
+                    <div class="interactive-terminal" id="terminal1">
+                        <div class="terminal-line">
+                            <div class="terminal-prompt">user@linux-mint:~$</div>
+                            <div class="terminal-output">sudo apt update</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Hit:1 http://archive.ubuntu.com/ubuntu focal InRelease</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Get:2 http://archive.ubuntu.com/ubuntu focal-updates InRelease [114 kB]</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">...</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Fetched 15.3 MB in 5s (3,080 kB/s)</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Reading package lists... Done</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-prompt">user@linux-mint:~$</div>
+                            <div class="terminal-output">sudo apt install samba samba-common-bin</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Reading package lists... Done</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Building dependency tree... Done</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">The following NEW packages will be installed:</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">  samba samba-common-bin</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-output">Do you want to continue? [Y/n]</div>
+                        </div>
+                        <div class="terminal-line">
+                            <div class="terminal-prompt">user@linux-mint:~$</div>
+                            <input type="text" class="terminal-input" placeholder="Type 'Y' and press Enter to continue..." onkeypress="handleTerminalInput(event, 'terminal1')">
+                        </div>
+                    </div>
+                    
+                    <div class="success-box" id="installSuccess" style="display: none;">
+                        <p><i class="fas fa-check-circle"></i> <strong>Success!</strong> Samba is now installed on your system.</p>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('prerequisites')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('hostSetup')">
+                        Next: Host Setup <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Host Setup Section -->
+                <section id="hostSetup" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-server"></i>
+                        <h2>Part 1: Setting Up the Host (The Computer with the USB Drive)</h2>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('step1')">
+                            <span><i class="fas fa-search"></i> Step 1: Find Your USB Drive</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content active" id="step1">
+                            <p>First, we need to know where Linux Mint mounted (connected) your USB drive.</p>
+                            <p>Find your username first:</p>
+                            
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('whoamiCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="whoamiCode">whoami</pre>
+                            </div>
+                            
+                            <p>This shows your username. Write it down! We'll use it throughout this guide.</p>
+                            
+                            <div class="info-box">
+                                <p><strong>Example output:</strong> <code>john</code> (this would be your actual username)</p>
+                                <p>Wherever you see <span class="placeholder" style="display: inline-block; padding: 2px 6px; margin: 0 3px;">username</span> in this guide, replace it with this!</p>
+                            </div>
+                            
+                            <p>Plug in your USB drive, then open Terminal and type:</p>
+                            
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('lsblkCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="lsblkCode">lsblk</pre>
+                            </div>
+                            
+                            <p>What you'll see: A list of all drives and partitions. Look for something like:</p>
+                            
+                            <div class="code-block">
+                                <pre>NAME   SIZE  TYPE MOUNTPOINT
+sda    4TB   disk
+└─sda1 4TB   part /media/kim/MyPassport</pre>
+                            </div>
+                            
+                            <p>The mount point is what appears under MOUNTPOINT. In Linux Mint, it's usually:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li><code>/media/[your-username]/[drive-name]</code></li>
+                                <li>Example: <code>/media/kim/MyPassport</code></li>
+                                <li>Example: <code>/media/kim/USB-DRIVE</code></li>
+                            </ul>
+                            
+                            <p><strong>Easy way to see it:</strong> Open the File Manager (Nemo), and your USB drive appears in the left sidebar. Right-click it and select "Properties" to see the location.</p>
+                            
+                            <p class="warning-box" style="margin-top: 20px;">
+                                <strong>Write this down!</strong> This is the path we'll share. For this guide, our example USB drive is at: <code>/media/kim/external</code>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('step2')">
+                            <span><i class="fas fa-check-circle"></i> Step 2: Check the Drive is Accessible</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="step2">
+                            <p>Let's make sure you can actually see the files:</p>
+                            
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('lsCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="lsCode">ls -la /media/kim/external</pre>
+                            </div>
+                            
+                            <p class="placeholder" style="margin: 15px 0;">
+                                Replace <span>/media/kim/external</span> with your actual USB drive path!
+                            </p>
+                            
+                            <p>What you'll see: A list of folders and files on your USB drive, like:</p>
+                            
+                            <div class="code-block">
+                                <pre>drwxr-xr-x  5 kim kim  4096 Dec 18 10:30 Media
+drwxr-xr-x  3 kim kim  4096 Dec 15 09:15 Games
+drwxr-xr-x  2 kim kim  4096 Dec 10 14:22 Projects
+drwxr-xr-x  4 kim kim  8192 Dec 05 11:30 Documents</pre>
+                            </div>
+                            
+                            <p>If you see "Permission denied": We'll fix permissions in the next step.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('step3')">
+                            <span><i class="fas fa-lock"></i> Step 3: Set Proper Permissions</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="step3">
+                            <p>Your USB drive needs the right permissions so Samba can share it.</p>
+                            
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('permCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="permCode">sudo chmod 755 /media/username/external
+sudo chown username:username /media/username/external</pre>
+                            </div>
+                            
+                            <div class="warning-box">
+                                <p><i class="fas fa-exclamation-triangle"></i> <strong>CRITICAL:</strong> Replace these with YOUR actual information!</p>
+                                <p>Example if your username is john and drive is at <code>/media/john/MyPassport</code>:</p>
+                                <div class="code-block" style="margin-top: 10px;">
+                                    <pre>sudo chmod 755 /media/john/MyPassport
+sudo chown john:john /media/john/MyPassport</pre>
+                                </div>
+                            </div>
+                            
+                            <p><strong>How to find your username if you forgot:</strong> Type <code>whoami</code> in the terminal</p>
+                            
+                            <div class="info-box">
+                                <p><strong>Breaking it down:</strong></p>
+                                <ul style="margin-left: 20px;">
+                                    <li><code>chmod 755</code>: Sets permissions
+                                        <ul>
+                                            <li><code>7</code> = You can read, write, and access folders</li>
+                                            <li><code>5</code> = Others can read and access, but not modify</li>
+                                        </ul>
+                                    </li>
+                                    <li><code>chown username:username</code>: Makes your user account the owner
+                                        <ul>
+                                            <li>First username = the user</li>
+                                            <li>Second username = the group (usually the same as your username)</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <p class="warning-box">
+                                <strong>For external drives formatted as NTFS or FAT32:</strong> You might need different options. If you have write permission issues later, we'll troubleshoot that.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('install')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('clientSetup')">
+                        Next: Client Setup <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Client Setup Section -->
+                <section id="clientSetup" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-laptop"></i>
+                        <h2>Part 2: Connecting from Client Computers</h2>
+                    </div>
+                    
+                    <p>Now switch to any other computer - the one you want to use to access the USB drive.</p>
+                    
+                    <div class="success-box">
+                        <p><strong>Good news:</strong> The client can run ANY operating system!</p>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <p><i class="fas fa-exclamation-triangle"></i> <strong>Remember to replace these in the connection examples:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><span class="placeholder" style="display: inline-block;">192.168.1.105</span> = Your host's actual static IP</li>
+                            <li><span class="placeholder" style="display: inline-block;">SharedDrive</span> = Your share name</li>
+                            <li><span class="placeholder" style="display: inline-block;">user2</span> = The Samba username you created</li>
+                        </ul>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 15px;">Choose Your Platform:</h3>
+                    
+                    <div class="platform-grid">
+                        <div class="platform-item">
+                            <i class="fab fa-linux"></i>
+                            <div>Linux Mint</div>
+                        </div>
+                        <div class="platform-item">
+                            <i class="fab fa-ubuntu"></i>
+                            <div>Ubuntu</div>
+                        </div>
+                        <div class="platform-item">
+                            <i class="fab fa-windows"></i>
+                            <div>Windows</div>
+                        </div>
+                        <div class="platform-item">
+                            <i class="fab fa-apple"></i>
+                            <div>macOS</div>
+                        </div>
+                        <div class="platform-item">
+                            <i class="fab fa-android"></i>
+                            <div>Android</div>
+                        </div>
+                        <div class="platform-item">
+                            <i class="fab fa-app-store-ios"></i>
+                            <div>iOS</div>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('linuxClient')">
+                            <span><i class="fab fa-linux"></i> Linux Mint / Ubuntu Client</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="linuxClient">
+                            <h4>Method 1: Using File Manager (Nemo/Nautilus) - Easiest!</h4>
+                            <p>This is the simplest way to access your shared drive.</p>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Open File Manager (folder icon in taskbar)</li>
+                                <li>Look in the left sidebar and click "Network"</li>
+                                <li>If you see your host computer, double-click it</li>
+                                <li>If not, press <code>Ctrl + L</code> and type: <code>smb://192.168.1.105/SharedDrive</code></li>
+                                <li>Enter your Samba username and password when prompted</li>
+                            </ol>
+                            <p style="margin-top: 15px;">Success! The USB drive now appears in your sidebar under "Network".</p>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('windowsClient')">
+                            <span><i class="fab fa-windows"></i> Windows Client</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="windowsClient">
+                            <h4>Method 1: Quick Connect</h4>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Open File Explorer (Windows Key + E)</li>
+                                <li>Click in the address bar at the top</li>
+                                <li>Type: <code>\\192.168.1.105\SharedDrive</code></li>
+                                <li>Press Enter and enter your credentials</li>
+                            </ol>
+                            
+                            <h4 style="margin-top: 20px;">Method 2: Map as Network Drive (Recommended)</h4>
+                            <p>This makes the USB drive appear as a permanent drive letter (like Z:).</p>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Open File Explorer</li>
+                                <li>Click "This PC" in the left sidebar</li>
+                                <li>Click "Map network drive" in the toolbar</li>
+                                <li>Choose a drive letter (like Z:)</li>
+                                <li>Type: <code>\\192.168.1.105\SharedDrive</code> in the Folder field</li>
+                                <li>Check "Reconnect at sign-in" and "Connect using different credentials"</li>
+                                <li>Click Finish and enter your Samba credentials</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('otherClients')">
+                            <span><i class="fas fa-mobile-alt"></i> Other Systems (macOS, Android, iOS)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="otherClients">
+                            <h4>macOS</h4>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Open Finder</li>
+                                <li>Press Cmd + K (or Go → Connect to Server)</li>
+                                <li>Type: <code>smb://192.168.1.105/SharedDrive</code></li>
+                                <li>Click Connect and enter credentials</li>
+                            </ol>
+                            
+                            <h4 style="margin-top: 20px;">Android / iOS</h4>
+                            <p>Use apps like:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li><strong>Android:</strong> Solid Explorer, CX File Explorer</li>
+                                <li><strong>iOS:</strong> VLC for Mobile, FileBrowser, FE File Explorer</li>
+                            </ul>
+                            <p style="margin-top: 15px;">In the app, add new network storage, choose SMB/CIFS, and enter your server IP, share name, username, and password.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <p><strong>The beauty of Samba:</strong> Set it up once on the Linux Mint host, access from anywhere!</p>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('hostSetup')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('useCases')">
+                        Next: Use Cases <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Use Cases Section -->
+                <section id="useCases" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-play-circle"></i>
+                        <h2>🎬 Use Case Examples</h2>
+                    </div>
+                    
+                    <p>These work from any client platform (Windows, Linux Mint, Ubuntu, Mac)!</p>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('streaming')">
+                            <span><i class="fas fa-film"></i> Use Case A: Streaming Media or Playing Games</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="streaming">
+                            <h4>Streaming Videos/Music with VLC Media Player</h4>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Connect to the share using the method for your OS</li>
+                                <li>Navigate to your Media folder in the network share</li>
+                                <li>Double-click any video or music file</li>
+                            </ol>
+                            <p style="margin-top: 15px;">It plays directly from the network drive - no downloading needed!</p>
+                            
+                            <div class="info-box" style="margin-top: 20px;">
+                                <p><strong>Performance tip:</strong></p>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li>For smooth HD streaming, use 5GHz WiFi</li>
+                                    <li>For 4K streaming, connect via Ethernet cable</li>
+                                    <li>Close other network-heavy applications while streaming</li>
+                                </ul>
+                            </div>
+                            
+                            <h4 style="margin-top: 25px;">Playing Games from Network Drive</h4>
+                            <p><strong>Games that work well over network:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>✅ Turn-based games (strategy, puzzles, card games)</li>
+                                <li>✅ Older games with lower file I/O requirements</li>
+                                <li>✅ Story-driven games with infrequent loading</li>
+                                <li>✅ Emulated games (ROMs via RetroArch, Dolphin, etc.)</li>
+                            </ul>
+                            
+                            <p style="margin-top: 15px;"><strong>Games that may struggle:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>⚠️ Fast-paced action games (fighting, FPS)</li>
+                                <li>⚠️ Open world games with constant streaming</li>
+                                <li>⚠️ Modern AAA games with large assets</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('videoEditing')">
+                            <span><i class="fas fa-video"></i> Use Case B: Video Editing with Remote Storage</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="videoEditing">
+                            <h4>Using Kdenlive, OpenShot, or Blender (Linux)</h4>
+                            <p><strong>For 1080p projects:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Open video files directly from the network share</li>
+                                <li>Edit normally</li>
+                                <li>Export back to the same location</li>
+                            </ul>
+                            
+                            <p style="margin-top: 15px;"><strong>For 4K projects:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Copy just the project file to your local computer</li>
+                                <li>Link to video files on the network share</li>
+                                <li>Edit using the linked files</li>
+                                <li>Export renders back to the network drive</li>
+                            </ul>
+                            
+                            <div class="info-box" style="margin-top: 20px;">
+                                <p><strong>Performance tip:</strong></p>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li>Use Ethernet connection for smooth 4K editing</li>
+                                    <li>WiFi works fine for 1080p</li>
+                                    <li>Consider creating proxy files for large 4K projects</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('backup')">
+                            <span><i class="fas fa-hdd"></i> Use Case C: Backing Up Files (All Platforms)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="backup">
+                            <h4>From Windows</h4>
+                            <p>Simple drag-and-drop:</p>
+                            <ol style="margin-left: 20px; margin-top: 15px;">
+                                <li>Open File Explorer</li>
+                                <li>Navigate to your mapped network drive (like Z:)</li>
+                                <li>Drag folders from your computer to the network drive</li>
+                            </ol>
+                            
+                            <h4 style="margin-top: 20px;">From Linux (Automatic backup with rsync)</h4>
+                            <p>Create a simple backup script:</p>
+                            
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('backupCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="backupCode">#!/bin/bash
+rsync -av --delete /home/user2/Documents/ /mnt/SharedDrive/Backups/Documents/
+rsync -av --delete /home/user2/Pictures/ /mnt/SharedDrive/Backups/Pictures/
+echo "Backup completed on $(date)" >> /home/user2/backup.log</pre>
+                            </div>
+                            
+                            <div class="warning-box" style="margin-top: 15px;">
+                                <p><i class="fas fa-exclamation-triangle"></i> <strong>Note:</strong> Replace <span class="placeholder" style="display: inline-block;">user2</span> with YOUR actual Linux username on the client computer!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('clientSetup')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('troubleshooting')">
+                        Next: Troubleshooting <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Troubleshooting Section -->
+                <section id="troubleshooting" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-tools"></i>
+                        <h2>Troubleshooting Common Issues</h2>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('prob1')">
+                            <span><i class="fas fa-exclamation-triangle"></i> Problem: "Failed to mount" or "Connection refused"</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="prob1">
+                            <p>Test network connectivity:</p>
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('pingCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="pingCode">ping 192.168.1.105</pre>
+                            </div>
+                            <p class="placeholder" style="margin: 15px 0;">
+                                Replace <span>192.168.1.105</span> with YOUR host's actual IP address!
+                            </p>
+                            <p><strong>If you get replies:</strong> Network is fine, keep troubleshooting</p>
+                            <p><strong>If no reply:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Check both computers are on same WiFi</li>
+                                <li>Verify the host computer is powered on</li>
+                                <li>Check the IP address didn't change (run <code>hostname -I</code> on host again)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('prob2')">
+                            <span><i class="fas fa-exclamation-triangle"></i> Problem: "Permission denied" or "Access denied"</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="prob2">
+                            <p>On the host computer, check Samba users:</p>
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode('pdbeditCode')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <pre id="pdbeditCode">sudo pdbedit -L</pre>
+                            </div>
+                            <p>If your user isn't listed:</p>
+                            <div class="code-block">
+                                <pre>sudo smbpasswd -a username
+sudo smbpasswd -e username</pre>
+                            </div>
+                            <p>Try resetting the password:</p>
+                            <div class="code-block">
+                                <pre>sudo smbpasswd username</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('prob3')">
+                            <span><i class="fas fa-exclamation-triangle"></i> Problem: Video stutters or buffers / Games lag constantly</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="prob3">
+                            <p><strong>Quick fixes:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Close other applications using network (downloads, updates)</li>
+                                <li>Move closer to WiFi router</li>
+                                <li>Switch to 5GHz WiFi (if available)</li>
+                                <li>Try VLC for media or different game if gaming</li>
+                                <li>Test with lower resolution media or less demanding game</li>
+                            </ul>
+                            <p style="margin-top: 15px;"><strong>Better solution:</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Use Ethernet cable on both computers (essential for gaming)</li>
+                                <li>Upgrade to better WiFi router</li>
+                                <li>Use WiFi 6 if both computers support it</li>
+                                <li>For games: Copy game to local drive for best performance</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin: 30px 0 15px;">Quick Command Reference</h3>
+                    
+                    <div class="toggle-container">
+                        <div class="toggle-header" onclick="toggleContent('commands')">
+                            <span><i class="fas fa-terminal"></i> Essential Commands</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="toggle-content" id="commands">
+                            <p><strong>Initial Setup (Host):</strong></p>
+                            <div class="code-block">
+                                <pre># Install Samba
+sudo apt update
+sudo apt install samba samba-common-bin
+
+# Find USB drive
+lsblk
+
+# Set permissions
+sudo chmod 755 /media/username/external
+sudo chown username:username /media/username/external
+
+# Create Samba users
+sudo smbpasswd -a username
+sudo smbpasswd -e username
+
+# Edit config
+sudo nano /etc/samba/smb.conf
+
+# Test config
+testparm
+
+# Restart Samba
+sudo systemctl restart smbd
+sudo systemctl enable smbd
+
+# Get IP address
+hostname -I
+
+# Open firewall
+sudo ufw allow samba</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="showSection('useCases')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-next" onclick="showSection('summary')">
+                        Next: Summary <i class="fas fa-arrow-right"></i>
+                    </button>
+                </section>
+                
+                <!-- Summary Section -->
+                <section id="summary" class="tutorial-section" style="display: none;">
+                    <div class="section-header">
+                        <i class="fas fa-flag-checkered"></i>
+                        <h2>Summary: What You've Accomplished</h2>
+                    </div>
+                    
+                    <div class="success-box">
+                        <p>You can now:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>✅ Share an external USB drive over your home network</li>
+                            <li>✅ Stream media or access games from any computer</li>
+                            <li>✅ Edit projects using files stored on a remote drive</li>
+                            <li>✅ Access your files without moving the USB drive around</li>
+                            <li>✅ Automatically mount the share at startup</li>
+                        </ul>
+                    </div>
+                    
+                    <h3 style="margin: 25px 0 15px;">The Beauty of This Setup</h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Your USB drive stays safely connected to one computer</li>
+                        <li>All your computers can access it simultaneously</li>
+                        <li>Works across Windows, Linux, Mac, and mobile devices</li>
+                        <li>No cloud subscriptions needed</li>
+                        <li>Complete control over your data</li>
+                        <li>Works great for large files (media, games, projects)</li>
+                    </ul>
+                    
+                    <div class="info-box" style="margin-top: 25px;">
+                        <p><strong>Last updated:</strong> December 2025</p>
+                        <p><strong>Platform:</strong> Linux Mint host, any OS for clients (Windows, Ubuntu, Mac, etc.)</p>
+                        <p><strong>Perfect for:</strong> Streaming media, gaming, file storage, project collaboration</p>
+                        <p><strong>Setup time:</strong> 30-45 minutes first time</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <h3><i class="fas fa-crown"></i> Congratulations!</h3>
+                        <p style="font-size: 1.2rem; margin-top: 10px;">You've successfully set up your own personal file sharing system!</p>
+                        
+                        <button class="btn" onclick="showSection('intro')" style="margin-top: 20px;">
+                            <i class="fas fa-redo"></i> Start Over
+                        </button>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <h3><i class="fas fa-road"></i> Quick Navigation</h3>
+                    <ul class="quick-nav">
+                        <li><a href="#intro" class="active" onclick="showSection('intro')"><i class="fas fa-info-circle"></i> Introduction</a></li>
+                        <li><a href="#understanding" onclick="showSection('understanding')"><i class="fas fa-sitemap"></i> Understanding Setup</a></li>
+                        <li><a href="#prerequisites" onclick="showSection('prerequisites')"><i class="fas fa-clipboard-check"></i> Prerequisites</a></li>
+                        <li><a href="#install" onclick="showSection('install')"><i class="fas fa-download"></i> Install Samba</a></li>
+                        <li><a href="#hostSetup" onclick="showSection('hostSetup')"><i class="fas fa-server"></i> Host Setup</a></li>
+                        <li><a href="#clientSetup" onclick="showSection('clientSetup')"><i class="fas fa-laptop"></i> Client Setup</a></li>
+                        <li><a href="#useCases" onclick="showSection('useCases')"><i class="fas fa-play-circle"></i> Use Cases</a></li>
+                        <li><a href="#troubleshooting" onclick="showSection('troubleshooting')"><i class="fas fa-tools"></i> Troubleshooting</a></li>
+                        <li><a href="#summary" onclick="showSection('summary')"><i class="fas fa-flag-checkered"></i> Summary</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-card">
+                    <h3><i class="fas fa-lightbulb"></i> Pro Tips</h3>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li>Use Ethernet for 4K streaming or gaming</li>
+                        <li>Set a static IP on your host computer</li>
+                        <li>Create a shared family account for simplicity</li>
+                        <li>Test with a small file before transferring large files</li>
+                        <li>Keep your Samba passwords secure</li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-card">
+                    <h3><i class="fas fa-share-alt"></i> Share This Guide</h3>
+                    <p style="margin-top: 10px;">Help others learn Samba file sharing!</p>
+                    <button class="btn" style="width: 100%; justify-content: center; margin-top: 15px;">
+                        <i class="fas fa-share"></i> Share with Friends
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="container">
+        <p>Interactive Samba File Sharing Tutorial for Linux Mint Beginners</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">This guide is for educational purposes. Always ensure you have proper backups before making system changes.</p>
+    </footer>
+
+    <script>
+        // Current section tracking
+        const sections = ['intro', 'understanding', 'prerequisites', 'install', 'hostSetup', 'clientSetup', 'useCases', 'troubleshooting', 'summary'];
+        const sectionTitles = [
+            'Introduction',
+            'Understanding the Setup',
+            'Before You Start',
+            'Installing Samba',
+            'Host Setup',
+            'Client Setup',
+            'Use Cases',
+            'Troubleshooting',
+            'Summary'
+        ];
+        
+        let currentSectionIndex = 0;
+        
+        // Initialize first section
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            setupTerminalInteraction();
+        });
+        
+        // Show a specific section
+        function showSection(sectionId) {
+            // Hide all sections
+            sections.forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            
+            // Show the selected section
+            document.getElementById(sectionId).style.display = 'block';
+            
+            // Update current section index
+            currentSectionIndex = sections.indexOf(sectionId);
+            
+            // Update progress bar
+            updateProgress();
+            
+            // Update quick navigation active state
+            updateNavigation(sectionId);
+            
+            // Scroll to top of content
+            window.scrollTo(0, 0);
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const progressPercent = Math.round((currentSectionIndex + 1) / sections.length * 100);
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('progressPercent').textContent = `${progressPercent}%`;
+            document.getElementById('currentSection').textContent = sectionTitles[currentSectionIndex];
+        }
+        
+        // Update navigation active state
+        function updateNavigation(activeId) {
+            const navLinks = document.querySelectorAll('.quick-nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${activeId}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Toggle content sections
+        function toggleContent(contentId) {
+            const content = document.getElementById(contentId);
+            const icon = content.previousElementSibling.querySelector('.fa-chevron-down');
+            
+            content.classList.toggle('active');
+            
+            if (content.classList.contains('active')) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+        
+        // Update checklist items
+        function updateChecklist(itemId) {
+            const item = document.getElementById(itemId);
+            const checkbox = item.querySelector('input');
+            
+            if (checkbox.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+        }
+        
+        // Copy code to clipboard
+        function copyCode(codeId) {
+            const codeElement = document.getElementById(codeId);
+            const codeText = codeElement.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                // Show feedback
+                const originalText = event.target.innerHTML;
+                event.target.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                
+                setTimeout(() => {
+                    event.target.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+        
+        // Setup terminal interaction
+        function setupTerminalInteraction() {
+            // Check all terminal inputs
+            const terminalInputs = document.querySelectorAll('.terminal-input');
+            terminalInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const terminal = this.closest('.interactive-terminal');
+                        const successBox = terminal.nextElementSibling;
+                        
+                        if (successBox && successBox.classList.contains('success-box')) {
+                            successBox.style.display = 'block';
+                            
+                            // Scroll to show success message
+                            setTimeout(() => {
+                                successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }, 100);
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Handle terminal input
+        function handleTerminalInput(event, terminalId) {
+            if (event.key === 'Enter') {
+                const input = event.target;
+                const value = input.value.trim().toLowerCase();
+                
+                if (value === 'y' || value === 'yes') {
+                    const terminal = document.getElementById(terminalId);
+                    const successBox = terminal.nextElementSibling;
+                    
+                    if (successBox && successBox.classList.contains('success-box')) {
+                        successBox.style.display = 'block';
+                        
+                        // Add a new line to terminal
+                        const newLine = document.createElement('div');
+                        newLine.className = 'terminal-line';
+                        newLine.innerHTML = `<div class="terminal-prompt">user@linux-mint:~$</div><div class="terminal-output">Y</div>`;
+                        terminal.appendChild(newLine);
+                        
+                        // Clear input
+                        input.value = '';
+                        
+                        // Scroll to show success message
+                        setTimeout(() => {
+                            successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 100);
+                    }
+                }
+            }
+        }
+        
+        // Auto-check all prerequisites after a delay (for demo purposes)
+        setTimeout(() => {
+            for (let i = 1; i <= 6; i++) {
+                const checkbox = document.getElementById(`item${i}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    updateChecklist(`check${i}`);
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
